@@ -1,0 +1,209 @@
+2cld Kerberos Install
+=====================
+
+==========
+References
+==========
+
+ #. https://github.com/2cld/kerberos
+ #. http://2cldkerberos.readthedocs.io/en/latest/
+ #. https://github.com/floragunncom/kerberos_ldap_environment/blob/master/Vagrantfile
+
+=======
+Install
+=======
+
+This 2cld Kerberos install document is intented to educate and support the following:
+
+ #. Manual command line.
+ #. Vagrant based Virtual Box.
+ #. Ansible based Provision Inventory.
+
+------------
+Manual Setup
+------------
+
+ #. Centos base image (with ssh) 2cldkrb5svr
+ #. ssh root@2cldkrb5svr
+ #. [root@2cldkrb5svr ~]# yum install krb5-server
+ #. [root@2cldkrb5svr ~]# vi /etc/krb5.conf
+     Uncomment lines that define realm and Search and Replace with your realm name::
+
+          :%s/example.com/2cld.lan/
+          :%s/EXAMPLE.COM/2CLD.LAN/
+
+     Point kdc and admin_server to kerberos-master::
+
+          kdc   2cldkrb5svr.2cld.lan
+          admin_server = 2cldkrv5svr.2cld.lan
+
+ #. [root@2cldkrb5svr ~]# vi /var/kerberos/krb6kdc/kdc.conf
+     Search and Replace with your realm name::
+
+         :%s/EXAMPLE.COM/2CLD.LAN/
+
+ #. [root@2cldkrb5svr ~]# vi /var/kerberos/krb6kdc/kadm5.acl
+     Search and Replace with your realm name::
+
+         :%s/EXAMPLE.COM/2CLD.LAN/
+
+ #. [root@2cldkrb5svr ~]# kdb5_util_create -s -r 2CLD.LAN
+     INPUT KDC database master key: (THIS IS PASSWORD)
+ #. [root@2cldkrb5svr ~]# systemctl enable kadmin
+ #. [root@2cldkrb5svr ~]# systemctl enable krb5kdc
+ #. [root@2cldkrb5svr ~]# systemctl start kadmin
+ #. [root@2cldkrb5svr ~]# systemctl start krb5kdc
+ #. [root@2cldkrb5svr ~]# systemctl status kadmin
+ #. [root@2cldkrb5svr ~]# systemctl status krb5kdc
+ #. [root@2cldkrb5svr ~]# firewall-cmd --get-services | grep kerberos --color
+     Check if kerberos service is defined in firewall
+
+ #. [root@2cldkrb5svr ~]# firewall-cmd --permanet --add-service kerberos
+ #. [root@2cldkrb5svr ~]# kadmin.local
+     This drops us into kadmin.local shell::
+
+       kadmin.local:  addprinc root/admin_server
+       Enter password for principal root/admin@2CLD.LAN: (THIS IS PASSWORD FOR PRINCIPAL)
+
+     Add 2 client test nodes ctnode1 and ctnode2, then create keytabs::
+
+       kadmin.local:  addprinc -randkey host/ctnode1.2cld.lan
+       kadmin.local:  addprinc -randkey host/ctnode2.2cld.lan
+       kadmin.local:  ktadd -k /tmp/ctnode1.keytab host/ctnode1.2cld.lan
+       kadmin.local:  ktadd -k /tmp/ctnode2.keytab host/ctnode2.2cld.lan
+
+     List principals::
+
+       kadmin.local:  listprincs
+       (Confirm you see the new hosts)
+
+     Quit out of shell::
+
+        kadmin.local: quit
+
+ #. [root@2cldkrb5svr ~]# scp /etc/krb5.conf /tmp/ctnode1.keytab ctnode1:/tmp/
+ #. [root@2cldkrb5svr ~]# scp /etc/krb5.conf /tmp/ctnode2.keytab ctnode2:/tmp/
+ #. [root@ctnode1 ~]# yum install pam_krb5 krb5_workstation
+ #. [root@ctnode1 ~]# cp /tmp/krb5.conf /etc/
+ #. [root@ctnode1 ~]# ktutil
+     This drops us into ktutil shell::
+
+       ktutil: rkt /tmp/ctnode1.keytab
+       ktutil: wkt /etc/krb5.keytab
+       ktutil: list
+       (should list the keytab)
+       ktutil: quit
+
+ #. [root@ctnode2 ~]# yum install pam_krb5 krb5_workstation
+ #. [root@ctnode2 ~]# cp /tmp/krb5.conf /etc/
+ #. [root@ctnode2 ~]# ktutil
+     This drops us into ktutil shell::
+
+       ktutil: rkt /tmp/ctnode2.keytab
+       ktutil: wkt /etc/krb5.keytab
+       ktutil: list
+       (should list the keytab)
+       ktutil: quit
+
+ #. [root@2cldkrb5svr ~]# yum install openldap-servers openldap-clients migrationtools
+ #. [root@2cldkrb5svr ~]# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG 
+ #. [root@2cldkrb5svr ~]# chown -R ldap. /var/lib/ldap/ 
+ #. [root@2cldkrb5svr ~]# id ldap
+      Should see the ldap user id gid and groups
+
+ #. [root@2cldkrb5svr ~]# slapppasswd
+      Should get a SSHA hash out, copy it 
+
+ #. [root@2cldkrb5svr ~]# cd /etc/openldap/slapd.d/cn\ config
+ #. [root@2cldkrb5svr cn-config]# vi olcDatabase\-\{0\}config.ldif
+     Append the following to end of file::
+
+      olcRootPW: {SSHA}longhashstringfromslappasswd
+
+ #. [root@2cldkrb5svr cn-config]# vi olcDatabase\-\{2\}hdb.ldif
+     Change the following in file::
+
+      :%s/my-domain/2cld/
+      :%s/com/lan/
+
+     So should change following (and add olcRootPW, olcAccess to bottom::
+
+      olcSuffix: dc=2cld,dc=lan
+      olcRootDN: cn Manager,dc-2cld, dc-lan
+      olcRootPW: {SSHA}longhashstringfromslappasswd
+      NOW AT END OF file
+      olcAccess: {0}to attrs=userPassword by self write by dn.base="cn=Manager,dc=2cld,dc=lan" write by anonymous auth by * none
+      olcAccess: {1}to * by dn.base="cn=Manager,dc=2cld,dc=lan" write by self write by * read
+
+ #. [root@2cldkrb5svr cn-config]# vi olcDatabase\-\{1\}monitor.ldif
+     Change the following in file:: 
+
+      :%s/my-domain/2cld/
+      :%s/com/lan/
+
+     So should change following::
+      ... "cn Manager,dc 2cld,dc lan"
+
+ #. [root@2cldkrb5svr cn-config]# systemctl enable slapd 
+ #. [root@2cldkrb5svr cn-config]# systemctl start slapd 
+ #. [root@2cldkrb5svr cn-config]# netstat -nltp
+     Should see slapd service listen on port 389, LDAPS would run on 636
+
+ #. [root@2cldkrb5svr cn-config]# firewall-cmd --get-services | grep lapd --color
+     Check if lapd service is defined in firewall
+
+ #. [root@2cldkrb5svr cn-config]# firewall-cmd --permanet --add-service lapd
+ #. [root@2cldkrb5svr cn-config]# ls -l /etc/openldap/schema/
+     Check for the schema names to import
+
+ #. [root@2cldkrb5svr cn-config]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/opneldap/schema/cosine.ldif
+ #. [root@2cldkrb5svr cn-config]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/opneldap/schema/nis.ldif
+ #. [root@2cldkrb5svr cn-config]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/opneldap/schema/inetorgperson.ldif
+ #. [root@2cldkrb5svr cn-config]# cd
+
+ #. [root@2cldkrb5svr ~]# vi base.ldif
+     Insert the following::
+
+      dn: dc=2cld,dc=lan
+      objectClass: dcObject
+      objectClass: organization
+      dc: 2cld
+      o : 2cld
+
+      dn: ou=People,dc=2cld,dc=lan
+      objectClass: organizatinalUnit
+      ou: People
+
+      dn: ou=Group,dc=2cld,dc=lan
+      objectClass: organizatinalUnit
+      ou: Group
+
+ #. [root@2cldkrb5svr ~]# ldapadd -x -D cn=Manager,dc=2cld,dc=lan -W -F base.ldif
+     Should ask for password
+
+ #. [root@2cldkrb5svr ~]# ldapsearch -x -D cn=Manager,dc=2cld,dc=lan -W -b dc=2cld,dc=lan
+     Should ask for password but then get search results.
+      
+ #. [root@2cldkrb5svr ~]# yum install 
+ #. [root@2cldkrb5svr ~]# yum install 
+
+ #. tbd
+
+-------------
+Vagrant Setup
+-------------
+
+ #. Step 1
+ #. Step 2
+ #. tbd
+ #. tbd
+
+-------------
+Ansible Setup
+-------------
+
+ #. Step 1
+ #. Step 2
+ #. tbd
+ #. tbd
+

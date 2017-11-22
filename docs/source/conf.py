@@ -45,7 +45,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'rtddemo'
+project = u'2cld kerberos'
 copyright = u'2017, Chris Trees'
 author = u'Chris Trees'
 
@@ -110,7 +110,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'rtddemodoc'
+htmlhelp_basename = '2cldkerberos'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -137,7 +137,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'rtddemo.tex', u'rtddemo Documentation',
+    (master_doc, '2cldkerberos.tex', u'2cld kerberos Documentation',
      u'Chris Trees', 'manual'),
 ]
 
@@ -147,7 +147,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'rtddemo', u'rtddemo Documentation',
+    (master_doc, '2cldkerberos', u'2cld kerberos Documentation',
      [author], 1)
 ]
 
@@ -158,8 +158,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'rtddemo', u'rtddemo Documentation',
-     author, 'rtddemo', 'One line description of project.',
+    (master_doc, '2cldkerberos', u'2cld kerberos Documentation',
+     author, '2cldkerberos', 'kerberos install for 2cld tests.',
      'Miscellaneous'),
 ]
 
