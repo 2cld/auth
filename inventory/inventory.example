@@ -10,7 +10,7 @@
 # ## configure a bastion host if your nodes are not directly reachable
 # bastion ansible_ssh_host=x.x.x.x
 
-# [kerberos-master]
+# [2cld-psmaster]
 # node1
 # node2
 
@@ -19,13 +19,13 @@
 # node2
 # node3
 
-# [client-node]
+# [2cld-node]
 # node2
 # node3
 # node4
 # node5
 # node6
 
-# [k8s-cluster:children]
-# kube-node
-# kube-master
+# [2cld-cluster:children]
+# 2cld-node
+# 2cld-psmaster

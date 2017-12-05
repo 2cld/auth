@@ -2,8 +2,6 @@
 
 2cld Authententication and Authorization
 
-See docs in docs/index.rst
-
-
- #. https://github.com/2cld/kerberos
- #. http://2cldkerberos.readthedocs.io/en/latest/
+ 1. https://github.com/2cld/auth
+ 1. https://github.com/2cld/docs/source/index.rst
+ 1. http://2cldauth.readthedocs.io/en/latest/

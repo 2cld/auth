@@ -18,17 +18,17 @@ SUPPORTED_OS = {
 }
 
 # Defaults for config options defined in CONFIG
-$num_instances = 3
-$instance_name_prefix = "2cld"
+$num_instances = 2
+$instance_name_prefix = "tocld"
 $vm_gui = false
 $vm_memory = 2048
 $vm_cpus = 1
 $shared_folders = {}
 $forwarded_ports = {}
-$subnet = "172.17.8"
+$subnet = "192.168.99"
 $os = "centos"
-# The first two nodes are 2cld kerberos masters
-$kerberos_master_instances = $num_instances == 1 ? $num_instances : ($num_instances - 1)
+# The first two nodes are tocld kerberos masters
+$tocld_master_instances = $num_instances == 1 ? $num_instances : ($num_instances - 1)
 # All nodes are kube nodes
 # $kube_node_instances = $num_instances
 $local_release_dir = "/vagrant/temp"
@@ -40,11 +40,12 @@ if File.exist?(CONFIG)
 end
 
 $box = SUPPORTED_OS[$os][:box]
+
+# Help Reference: ansible inventory
 # if $inventory is not set, try to use example
 $inventory = File.join(File.dirname(__FILE__), "inventory") if ! $inventory
 
-# if $inventory has a hosts file use it, otherwise copy over vars etc
-# to where vagrant expects dynamic inventory to be.
+# if $inventory has a hosts file use it, otherwise copy over vars etc to where vagrant expects dynamic inventory to be.
 if ! File.exist?(File.join(File.dirname($inventory), "hosts"))
   $vagrant_ansible = File.join(File.dirname(__FILE__), ".vagrant",
                        "provisioners", "ansible")
@@ -62,22 +63,28 @@ if Vagrant.has_plugin?("vagrant-proxyconf")
 end
 
 Vagrant.configure("2") do |config|
-  # always use Vagrants insecure key
-  config.ssh.insert_key = false
+  # Help Reference: box config
   config.vm.box = $box
   if SUPPORTED_OS[$os].has_key? :box_url
     config.vm.box_url = SUPPORTED_OS[$os][:box_url]
   end
+
+  # Help Reference: ssh key
+  # always use Vagrants insecure key
+  config.ssh.insert_key = false
   config.ssh.username = SUPPORTED_OS[$os][:user]
   # plugin conflict
   if Vagrant.has_plugin?("vagrant-vbguest") then
     config.vbguest.auto_update = false
   end
 
+  # Help Reference: vm instance create
   (1..$num_instances).each do |i|
     config.vm.define vm_name = "%s-%02d" % [$instance_name_prefix, i] do |config|
+      # Help Reference: vm hostname
       config.vm.hostname = vm_name
-
+      
+      # Help Reference: vm proxy
       if Vagrant.has_plugin?("vagrant-proxyconf")
         config.proxy.http     = ENV['HTTP_PROXY'] || ENV['http_proxy'] || ""
         config.proxy.https    = ENV['HTTPS_PROXY'] || ENV['https_proxy'] ||  ""
@@ -88,6 +95,7 @@ Vagrant.configure("2") do |config|
 #        config.vm.network "forwarded_port", guest: 2375, host: ($expose_docker_tcp + i - 1), auto_correct: true
 #      end
 
+      # Help Reference: vm port forward
       $forwarded_ports.each do |guest, host|
         config.vm.network "forwarded_port", guest: guest, host: host, auto_correct: true
       end
@@ -99,6 +107,7 @@ Vagrant.configure("2") do |config|
         end
       end
 
+      # Help Reference: vm shared folders
       $shared_folders.each do |src, dst|
         config.vm.synced_folder src, dst
       end
@@ -109,6 +118,7 @@ Vagrant.configure("2") do |config|
         vb.cpus = $vm_cpus
       end
 
+      # Help Reference: vm ip and network
       ip = "#{$subnet}.#{i+100}"
       host_vars[vm_name] = {
         "ip": ip,
@@ -127,9 +137,10 @@ Vagrant.configure("2") do |config|
 
       # Disable swap for each vm
       config.vm.provision "shell", inline: "swapoff -a"
+      config.vm.post_up_message = "Test"
 
-      # Only execute once the Ansible provisioner,
-      # when all the machines are up and ready.
+      # Help Reference: run ansible provisioner
+      # Only execute once the Ansible provisioner, when all the machines are up and ready.
       if i == $num_instances
         config.vm.provision "ansible" do |ansible|
           ansible.playbook = "cluster.yml"
@@ -143,10 +154,9 @@ Vagrant.configure("2") do |config|
           ansible.host_vars = host_vars
           #ansible.tags = ['download']
           ansible.groups = {
-            "etcd" => ["#{$instance_name_prefix}-0[1:#{$etcd_instances}]"],
-            "kube-master" => ["#{$instance_name_prefix}-0[1:#{$kube_master_instances}]"],
-#            "kube-node" => ["#{$instance_name_prefix}-0[1:#{$kube_node_instances}]"],
-            "k8s-cluster:children" => ["kube-master", "kube-node"],
+            "tocld-psmaster" => ["#{$instance_name_prefix}-0[1:#{$tocld_master_instances}]"],
+            "tocld-node" => ["#{$instance_name_prefix}-0[1:#{$tocld_node_instances}]"],
+            "tocld-cluster:children" => ["tocld-psmaster", "tocld-node"],
           }
         end
       end

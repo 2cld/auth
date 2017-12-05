@@ -60,3 +60,9 @@ krb5-server installation
 ------------------------
  #. [root@ps1 ~]# yum install krb5-server
  #. [root@ps1 ~]# vi /etc/krb5.conf
+
+https://www.vagrantup.com/docs/other/debugging.html
+VAGRANT_LOG=info vagrant up
+
+
+  INFO subprocess: Starting process: ["/usr/local/bin/ansible-playbook", "--connection=ssh", "--timeout=30", "--limit=all", "--inventory-file=/Users/cat/auth/.vagrant/provisioners/ansible/inventory", "--become", "--forks=2", "--flush-cache", "cluster.yml"]

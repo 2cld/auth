@@ -1,0 +1,7 @@
+---
+# tasks file for 2cld-defaults
+- name: Configure defaults
+  debug:
+    msg: "Check roles/2cld-defaults/defaults/main.yml"
+  tags:
+    - always

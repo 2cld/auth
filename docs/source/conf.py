@@ -45,7 +45,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'2cld kerberos'
+project = u'2cld auth'
 copyright = u'2017, Chris Trees'
 author = u'Chris Trees'
 
