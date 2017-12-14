@@ -5,6 +5,23 @@ The goal of the vagrantfile is a minimum setup of multiple vm then passing off t
 
 .. _cluster.yml: https://github.com/2cld/auth/blob/master/cluster.yml
 
+#. Ansible - Automation via 'cluster.yml' playbook and 'inventory'
+
+    1. Ansible Example Command Line
+
+     Shown below is an ansible-playbook command line using vagrant inventory structure::
+
+        catmini:auth cat$ /usr/local/bin/ansible-playbook --connection=ssh --timeout=30 --limit=all --inventory-file=/Users/cat/auth/.vagrant/provisioners/ansible/inventory --become --forks=2 --flush-cache cluster.yml
+
+    2. Additional Ansible Help
+
+     .. toctree::
+        :maxdepth: 2
+
+        auth-create-ansible
+        auth-restore-ansible
+         
+
 ===========
 Quick Start
 ===========
@@ -14,7 +31,8 @@ Below is quickstart vagrant steps::
   catmini:~ cat$ cd auth
   catmini:~ cat$ vagrant up
   ... wait ... vagrant provison will run cluster.yml
-  catmini:~ cat$ ansible-playbook cluster 
+  catmini:~ cat$ vagrant provision
+  ... will run ansible through vagrant and show detail of ansible run... 
   catmini:~ cat$
 
 

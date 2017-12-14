@@ -7,7 +7,6 @@ tocld-01 ansible_host=127.0.0.1 ansible_port=2222 ansible_user='vagrant' ansible
 tocld-0[1:1]
 
 [tocld-node]
-tocld-0[1:2]
 
 [tocld-cluster:children]
 tocld-psmaster

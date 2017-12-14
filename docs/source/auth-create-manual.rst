@@ -1,15 +1,16 @@
-2cld auth Install - Manual
+2cld auth Create - Manual
 ==========================
 
 ==========
 References
 ==========
 
- #. https://github.com/2cld/kerberos
- #. http://2cldkerberos.readthedocs.io/en/latest/
+ #. https://github.com/2cld/auth
+ #. http://2cldauth.readthedocs.io/en/latest/
  #. https://web.mit.edu/kerberos/krb5-1.12/doc/admin/realm_config.html
  #. https://web.mit.edu/kerberos/krb5-latest/doc/admin/install_kdc.html
  #. https://support.ca.com/us/knowledge-base-articles.TEC1213853.html
+ #. Portions of "OpenAFS for Mail Services" (see ctreesmsllc repo)
 
 ====================
 Manual Install Steps

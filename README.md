@@ -2,6 +2,6 @@
 
 2cld Authententication and Authorization
 
- 1. https://github.com/2cld/auth
- 1. https://github.com/2cld/docs/source/index.rst
- 1. http://2cldauth.readthedocs.io/en/latest/
++ https://github.com/2cld/auth
++ https://github.com/2cld/docs/source/index.rst
++ http://2cldauth.readthedocs.io/en/latest/

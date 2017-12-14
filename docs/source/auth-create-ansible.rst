@@ -1,17 +1,35 @@
-2cld auth Install - Ansible
+2cld auth Create - Ansible
 ===============================
 
 ==========
 References
 ==========
 
- #. Public Repo at https://github.com/2cld/kerberos
- #. Public Documents at http://2cldkerberos.readthedocs.io/en/latest/
+ #. Public Repo at https://github.com/2cld/auth
+ #. Public Documents at http://2cldauth.readthedocs.io/en/latest/
  #. Model References 
 
     #. http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-via-pip 
     #. https://github.com/kubernetes-incubator/kubespray 
     #. https://github.com/bennojoy/ansible-roles 
+
+ #. network
+
+    #. https://galaxy.ansible.com/bennojoy/network_interface
+    #. https://github.com/bennojoy/network_interface
+    #. https://github.com/2cld/auth/roles/network_interface
+
+ #. ntp
+
+    #. https://galaxy.ansible.com/bennojoy/ntp/
+    #. https://github.com/bennojoy/ntp
+    #. https://github.com/2cld/ntp
+
+ #. dnsmasq
+
+    #. none on ansible-galaxy
+    #. https://github.com/kubernetes-incubator/kubespray/tree/master/roles/dnsmasq
+    #. https://github.com/2cld/dnsmasq
 
  #. kerberos-server
 
@@ -31,17 +49,7 @@ References
     #. https://github.com/bennojoy/openldap_server
     #. https://github.com/2cld/openldap_server
  
- #. ntp
 
-    #. https://galaxy.ansible.com/bennojoy/ntp/
-    #. https://github.com/bennojoy/ntp
-    #. https://github.com/2cld/ntp
-
- #. network
-
-    #. https://galaxy.ansible.com/bennojoy/network_interface
-    #. https://github.com/bennojoy/network_interface
-    #. https://github.com/2cld/network_interface
 
 =====================
 Ansible Install Steps
