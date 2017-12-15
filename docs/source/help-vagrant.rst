@@ -25,16 +25,6 @@ References
  + https://github.com/floragunncom/kerberos_ldap_environment/blob/master/Vagrantfile
  + https://www.vagrantup.com/docs/other/debugging.html
  + https://stackoverflow.com/questions/10864372/how-to-ssh-to-vagrant-without-actually-running-vagrant-ssh
- + https://galaxy.ansible.com/bertvv/
- + https://github.com/bertvv/ansible-toolbox
- + https://github.com/bertvv/ansible-skeleton
- + https://github.com/bertvv/ansible-role-rh-base
- + https://youtu.be/qJ0VNO6z68M?t=99
- + https://galaxy.ansible.com/bertvv/rh-base/
- + https://github.com/mikrotik-ansible/mikrotik-firewall
- + https://galaxy.ansible.com/geerlingguy/
- + https://galaxy.ansible.com/bennojoy/
- + https://github.com/bertvv/ansible-role-bind
 
 
 =====================
