@@ -116,17 +116,9 @@ ansible-tool-box_ (atb) Structure Explained
 
     Example::
 
-        - name: srv002
-          synced_folders:
-            - src: test
-              dest: /tmp/test
-            - src: www
-              dest: /var/www/html
-              options:
-                :create: true
-                :owner: root
-                :group: root
-                :mount_options: ['dmode=0755', 'fmode=0644']
+      ---
+      - name: srv001
+        ip: 192.168.56.10
 
     The ansible/ directory contains the Ansible configuration, and should be structured according to Ansible's best practices. It should at least contain the standard site.yml.
 
@@ -136,27 +128,99 @@ ansible-tool-box_ (atb) Structure Explained
 
     vagrant-hosts.yml so a Vagrant box is created. A few examples that also illustrate the optional settings::
 
-      - name: srv003
-        ip: 192.168.56.13
-        auto_config: false
-        
-      - name: srv004
-        ip: 172.16.0.5
-        netmask: 255.255.0.0
-        intnet: true
-        
-      - name: srv005
-        ip: 192.168.56.14
-        mac: "00:03:DE:AD:BE:EF"
-        playbook: server.yml  # defaults to site.yml
+      ---
+      - name: srv001
+        ip: 192.168.56.10
 
-    site.yml to assign roles to your nodes, e.g.::
+      - name: srv002
+        box: bento/centos-7.4
+        ip: 192.168.56.11
+        synced_folders:
+          - src: test
+            dest: /tmp/test
+          - src: www
+            dest: /var/www/html
+            options:
+              :create: true
+              :owner: root
+              :group: root
+              :mount_options: ['dmode=0755', 'fmode=0644']
 
-      - host: srv003
+    ansible/site.yml to assign roles to your nodes, e.g.::
+
+      # site.yml
+      ---
+      - hosts: all
         become: true
         roles:
           - bertvv.rh-base
-          - bertvv.httpd
+
+      - hosts: srv001
+        become: true
+        roles: []
+
+      - hosts: srv002
+        become: true
+        roles: []
+
+    ansible/group_vars/all.yml for group var assignments, e.g.::
+
+      # group_vars/all.yml
+      # Variables visible to all nodes
+      ---
+
+        rhbase_users:
+        - name: msops
+          comment: 'MailServices Operations'
+          password: '$1$b6qsvp3l$Yg8kEH89fxezP5vg.a67l/'
+
+    The password text is crypt-md5 hash, quick online helper https://www.mkpasswd.net/index.php so for 'test' => '$1$8KRlCK20$LVrCpoSOTRuTCmhaJbCzU1'
+
+ #. Vagrant Verification
+
+    Vagrant-CLI_ to check the vitual network and virtual box enviroment.
+
+    **vagrant global-status** will tell you the state of all active Vagrant environments on the system for the currently logged in user::
+
+      catmini:test-project cat$ vagrant global-status
+      id       name     provider   state    directory                           
+      --------------------------------------------------------------------------
+      10a91e6  tocld-01 virtualbox poweroff /Users/cat/auth                     
+      c07ac5e  tocld-02 virtualbox poweroff /Users/cat/auth                     
+      904c9b2  srv001   virtualbox running  /Users/cat/test-project             
+      fa69679  srv002   virtualbox running  /Users/cat/test-project             
+
+    **vagrant status** will tell you the state of the active Vagrant environments on the system for the currently logged in user::
+
+      catmini:test-project cat$ vagrant status
+      Current machine states:
+      
+      srv001                    running (virtualbox)
+      srv002                    running (virtualbox)
+
+
+    **vagrant port srv001** displays the full list of guest ports mapped to the host machine ports::
+
+      catmini:test-project cat$ vagrant port srv001
+      
+          22 (guest) => 2222 (host)
+
+    **vagrant ssh srv001** will ssh into the vm with vagrant user::
+
+      catmini:test-project cat$ vagrant ssh srv001
+      Last login: Sun Dec 17 19:59:01 2017 from 10.0.2.2
+      [vagrant@srv001 ~]$ whoami
+      vagrant
+      [vagrant@srv001 ~]$ 
+
+ #. ssh with msops
+
+    We should be able to ssh to the node with the msops user we created::
+
+      catmini:test-project cat$ ssh msops@192.168.56.10 
+      msops@192.168.56.10's password: 
+      Last login: Sun Dec 17 22:45:53 2017 from 192.168.56.1
+      [msops@srv001 ~]$ 
 
  #. Testing via test_BATS_
 
@@ -179,7 +243,6 @@ ansible-tool-box_ (atb) Structure Explained
     On host srv001, the scripts common.bats and web.bats will be executed, on host srv002, it's common.bats and db.bats.
 
 
-
 =====================
 cluster.yml Explained
 =====================
@@ -194,9 +257,11 @@ ansible-skeleton_
 atb-init.sh_
 ansible-tool-box_
 test_BATS_
+Vagrant-CLI_
 
 .. _ansible-skeleton: https://github.com/bertvv/ansible-skeleton.git
 .. _atb-init.sh: https://github.com/bertvv/ansible-toolbox/blob/master/bin/atb-init.sh
 .. _ansible-tool-box: https://github.com/bertvv/ansible-toolbox
 .. _test_BATS: https://github.com/sstephenson/bats
+.. _Vagrant-CLI: https://www.vagrantup.com/docs/cli/
 
